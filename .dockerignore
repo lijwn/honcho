@@ -1,5 +1,4 @@
 fly.toml
-.env
 .env.template
 *.md
 docs/**
