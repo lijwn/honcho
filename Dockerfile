@@ -2,6 +2,10 @@
 # https://testdriven.io/blog/docker-best-practices/
 FROM python:3.13-slim-bookworm
 
+# Use Tsinghua mirror for faster downloads in China
+ENV PIP_INDEX_URL=https://pypi.tuna.tsinghua.edu.cn/simple
+ENV UV_PIP_INDEX_URL=https://pypi.tuna.tsinghua.edu.cn/simple
+
 COPY --from=ghcr.io/astral-sh/uv:0.9.24 /uv /bin/uv
 
 # Set Working directory
@@ -9,19 +13,20 @@ WORKDIR /app
 
 # Enable bytecode compilation
 ENV UV_COMPILE_BYTECODE=1
-
-# Copy from the cache instead of linking since it's a mounted volume
 ENV UV_LINK_MODE=copy
 
 # Python optimizations
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
+# Set UV timeout for network operations
+ENV UV_HTTP_TIMEOUT=120
+
 # Install the project's dependencies using the lockfile and settings
 RUN --mount=type=cache,target=/root/.cache/uv \
     --mount=type=bind,source=uv.lock,target=uv.lock \
     --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
-    uv sync --frozen --no-install-project --no-group dev
+    uv sync --frozen --no-install-project --no-group dev --index https://pypi.tuna.tsinghua.edu.cn/simple
 
 # Copy only requirements to cache them in docker layer
 COPY uv.lock pyproject.toml /app/
@@ -37,9 +42,6 @@ ENV UV_CACHE_DIR=/tmp/uv-cache
 
 # Create non-root user and set ownership
 RUN addgroup --system app && adduser --system --group app && mkdir -p /tmp/uv-cache && chown -R app:app /app /tmp/uv-cache
-
-# Set default vector dimensions (can be overridden by .env)
-ENV VECTOR_STORE_DIMENSIONS=1536
 
 COPY --chown=app:app src/ /app/src/
 COPY --chown=app:app migrations/ /app/migrations/
