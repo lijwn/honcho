@@ -6,6 +6,7 @@ Create Date: 2024-01-01 12:00:00.000000
 
 """
 
+import os
 from collections.abc import Sequence
 
 import sqlalchemy as sa
@@ -14,6 +15,9 @@ from pgvector.sqlalchemy import Vector
 
 from migrations.utils import index_exists, table_exists
 from src.config import settings
+
+# Get vector dimensions from environment
+_VECTOR_DIMENSIONS = int(os.environ.get("VECTOR_STORE_DIMENSIONS", "1536"))
 
 # revision identifiers, used by Alembic.
 revision: str = "917195d9b5e9"
@@ -28,7 +32,7 @@ def upgrade() -> None:
         "message_embeddings",
         sa.Column("id", sa.BigInteger(), sa.Identity(), nullable=False),
         sa.Column("content", sa.Text(), nullable=False),
-        sa.Column("embedding", Vector(1536), nullable=False),
+        sa.Column("embedding", Vector(_VECTOR_DIMENSIONS), nullable=False),
         sa.Column("message_id", sa.Text(), nullable=False),
         sa.Column("workspace_name", sa.Text(), nullable=False),
         sa.Column("session_name", sa.Text(), nullable=True),

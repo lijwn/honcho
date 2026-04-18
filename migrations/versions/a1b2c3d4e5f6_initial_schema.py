@@ -6,6 +6,7 @@ Create Date: 2024-01-01 00:00:00.000000
 
 """
 
+import os
 from collections.abc import Sequence
 
 import sqlalchemy as sa
@@ -14,6 +15,9 @@ from pgvector.sqlalchemy import Vector
 from sqlalchemy.dialects import postgresql
 
 from src.config import settings
+
+# Get vector dimensions from environment
+_VECTOR_DIMENSIONS = int(os.environ.get("VECTOR_STORE_DIMENSIONS", "1536"))
 
 # revision identifiers, used by Alembic.
 revision: str = "a1b2c3d4e5f6"
@@ -363,7 +367,7 @@ def upgrade() -> None:
             server_default="{}",
         ),
         sa.Column("content", sa.Text(), nullable=False),
-        sa.Column("embedding", Vector(1536), nullable=True),  # pyright: ignore
+        sa.Column("embedding", Vector(_VECTOR_DIMENSIONS), nullable=True),  # pyright: ignore
         sa.Column(
             "created_at",
             sa.DateTime(timezone=True),

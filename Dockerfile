@@ -38,6 +38,9 @@ ENV UV_CACHE_DIR=/tmp/uv-cache
 # Create non-root user and set ownership
 RUN addgroup --system app && adduser --system --group app && mkdir -p /tmp/uv-cache && chown -R app:app /app /tmp/uv-cache
 
+# Set default vector dimensions (can be overridden by .env)
+ENV VECTOR_STORE_DIMENSIONS=1536
+
 COPY --chown=app:app src/ /app/src/
 COPY --chown=app:app migrations/ /app/migrations/
 COPY --chown=app:app scripts/ /app/scripts/

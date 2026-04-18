@@ -1,3 +1,5 @@
+import os
+
 import sqlalchemy as sa
 from alembic import op
 
@@ -6,6 +8,11 @@ from src.config import settings
 
 def get_schema() -> str:
     return settings.DB.SCHEMA
+
+
+def get_vector_dimensions() -> int:
+    """Get vector dimensions from environment variable or default to 1536."""
+    return int(os.environ.get("VECTOR_STORE_DIMENSIONS", "1536"))
 
 
 def table_exists(table_name: str, inspector: sa.Inspector | None = None) -> bool:
